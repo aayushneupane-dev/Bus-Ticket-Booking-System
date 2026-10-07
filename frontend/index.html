@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nepal Bus Tickets</title>
+
+  <style>
+    /* ---------- Colors and basics ---------- */
+    :root {
+      --primary: #e63946;
+      --primary-dark: #c92a37;
+      --dark: #1d3557;
+      --light: #f1f5f9;
+      --taken: #cbd5e1;
+      --selected: #2a9d8f;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: linear-gradient(135deg, #1d3557 0%, #457b9d 100%);
+      min-height: 100vh;
+      padding: 24px 16px;
+      color: var(--dark);
+    }
+
+    /* ---------- Page header ---------- */
+    header { text-align: center; color: var(--white); margin-bottom: 24px; }
+    header h1 { font-size: 2rem; }
+    header p { opacity: 0.85; margin-top: 6px; }
+
+    /* ---------- Two-column layout (stacks on phones) ---------- */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h2 { font-size: 1.15rem; margin-bottom: 16px; }
+
+    /* ---------- Form fields ---------- */
+    label { display: block; font-weight: 600; font-size: 0.9rem; margin: 14px 0 6px; }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus { outline: none; border-color: var(--selected); }
+
+    /* ---------- Seat grid ---------- */
+    .bus-frame {
+      background: var(--light);
+      border: 3px solid #94a3b8;
+      border-radius: 24px 24px 12px 12px;
+      padding: 16px;
+      margin-top: 8px;
+    }
+
+    .driver { text-align: right; font-size: 1.4rem; margin-bottom: 10px; }
+
+    /* 5 columns: 2 seats | aisle | 2 seats */
+    #seatGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 24px 1fr 1fr;
+      gap: 8px;
+    }
+
+    .seat {
+      padding: 10px 0;
+      border: none;
+      border-radius: 8px 8px 4px 4px;
+      background: var(--white);
+      border-bottom: 4px solid #94a3b8;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .seat:hover:not(:disabled) { transform: translateY(-2px); background: #dff3f0; }
+
+    /* Seat the user has clicked */
+    .seat.selected { background: var(--selected); color: var(--white); border-bottom-color: #1f7a6f; }
+
+    /* Seats that are already booked: gray and not clickable */
+    .seat.taken {
+      background: var(--taken);
+      color: #94a3b8;
+      border-bottom-color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .aisle { width: 24px; }
+
+    /* ---------- Legend under the grid ---------- */
+    .legend { display: flex; gap: 16px; margin-top: 14px; font-size: 0.8rem; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .legend i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; border: 1px solid #94a3b8; }
+
+    /* ---------- Summary box and button ---------- */
+    .summary {
+      background: var(--light);
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 18px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    button.submit {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: var(--white);
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.submit:hover:not(:disabled) { background: var(--primary-dark); }
+    button.submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    /* ---------- Success / error message ---------- */
+    #message {
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    #message.success { display: block; background: #d1fae5; color: #065f46; }
+    #message.error { display: block; background: #fee2e2; color: #991b1b; }
+
+    /* ---------- Phones ---------- */
+    @media (max-width: 760px) {
+      .container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🚌 Nepal Bus Tickets</h1>
+    <p>Pick your route, choose your seat, and travel with ease.</p>
+  </header>
+
+  <div class="container">
+
+    <!-- LEFT CARD: choose route and seat -->
+    <div class="card">
+      <h2>1. Choose your trip and seat</h2>
+
+      <label for="routeSelect">Route</label>
+      <select id="routeSelect">
+        <option value="">Loading routes...</option>
+      </select>
+
+      <label>Seat map</label>
+      <div class="bus-frame">
+        <div class="driver">🧑‍✈️</div>
+        <!-- app.js fills this with 40 seat buttons -->
+        <div id="seatGrid"></div>
+      </div>
+
+      <div class="legend">
+        <span><i style="background:#ffffff"></i> Available</span>
+        <span><i style="background:#2a9d8f"></i> Selected</span>
+        <span><i style="background:#cbd5e1"></i> Taken</span>
+      </div>
+    </div>
+
+    <!-- RIGHT CARD: checkout form -->
+    <div class="card">
+      <h2>2. Passenger details</h2>
+
+      <form id="bookingForm">
+        <label for="passengerName">Full name</label>
+        <input type="text" id="passengerName" placeholder="e.g. Sita Sharma" required maxlength="100">
+
+        <label for="phone">Phone number</label>
+        <input type="tel" id="phone" placeholder="e.g. 9812345678" required
+               pattern="9[78][0-9]{8}" title="Enter a 10-digit Nepali mobile number starting with 97 or 98">
+
+        <div class="summary" id="summary">Select a route and a seat to see your booking summary.</div>
+
+        <button type="submit" class="submit" id="submitBtn" disabled>Book My Seat</button>
+      </form>
+
+      <div id="message"></div>
+    </div>
+  </div>
+
+  <!-- Load our JavaScript at the end so the page elements above already exist -->
+  <script src="app.js"></script>
+</body>
+</html>
