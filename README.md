@@ -50,13 +50,6 @@ Whether two passengers click the same seat at the same moment or one refreshes t
 | 🔗 `tickets/urls.py` | API paths for routes and bookings |
 | 🔧 `bus_project/settings.py` | PostgreSQL, CORS, and DRF configuration |
 
-## 📸 Preview
-
-![Nepal Bus Tickets booking page](![Uploading Screenshot 2026-10-07 230615.png…]()
-)
-
-*A confirmed booking: seat 1 is now gray and unclickable, and a success message is shown.*
-
 ## 🛠️ Tech Stack
 
 - Python
@@ -78,9 +71,6 @@ bus_booking/
 ├── manage.py
 ├── requirements.txt
 ├── README.md
-│
-├── screenshots/
-│   └── booking-page.png
 │
 ├── bus_project/
 │   ├── settings.py
